@@ -1,0 +1,217 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f8f7ff">
+  <meta name="description" content="A peaceful Radhe Radhe chanting counter with voice counting and loop progress.">
+  <title>Radhe Counter — Your devotion, counted</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <!-- Browser tab favicon -->
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/radha-krishna-logo.png') }}?v=2">
+
+  <!-- Optional: browser and mobile shortcut icon -->
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/radha-krishna-logo.png') }}">
+</head>
+
+<body>
+  <main class="app-shell" id="appShell">
+
+    <header class="topbar">
+      <div class="brand">
+        <div>
+          <div class="brand-mark">
+            <img
+              src="{{ url_for('static', filename='images/radha-krishna-logo.png') }}"
+              alt="Radha Krishna" class="brand-logo" >
+          </div>
+        </div>
+        <div class="brand-text">
+          <div class="brand-name">Radhe Counter</div>
+          <div class="brand-tagline">Your devotion, counted.</div>
+        </div>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="eyebrow">A MOMENT OF MINDFULNESS</div>
+      <h1>Every chant brings you<br><span>closer to your goal.</span></h1>
+      <p>Say “Radhe Radhe” and let your count grow, one chant at a time.</p>
+    </section>
+
+    <div class="dashboard-grid">
+
+      <!-- LEFT: settings and manual counter -->
+      <section class="counter-card" aria-labelledby="countLabel">
+
+        <div class="settings-header">
+          <div>
+            <h2>Jaap settings</h2>
+            <p>Set your target for this session.</p>
+          </div>
+          <button id="saveSettingsBtn" class="set-limit-button" type="button">
+            Save all settings
+          </button>
+        </div>
+
+        <div class="settings-grid">
+          <div class="setting-field">
+            <label for="jaapsPerLoop">Chants per loop</label>
+            <input id="jaapsPerLoop" type="number"
+                   min="1" max="1000000" step="1" value="108">
+          </div>
+          <div class="setting-field">
+            <label for="totalLoops">Number of loops</label>
+            <input id="totalLoops" type="number"
+                   min="1" max="100000" step="1" value="5">
+          </div>
+        </div>
+
+        <div class="card-topline">
+          <span class="listening-pill" id="listeningPill">
+            <span class="status-dot"></span>
+            <span id="statusText">Microphone off</span>
+          </span>
+          <span class="goal-label">CURRENT LOOP</span>
+        </div>
+
+        <div class="count-area" id="countArea">
+          <div class="count-caption" id="countLabel">Current loop</div>
+          <div class="count-number" id="countNumber">0</div>
+          <div class="limit-line">
+            of <strong id="limitDisplay">108</strong> chants
+          </div>
+
+          <div class="progress-track"
+               id="loopProgressTrack"
+               role="progressbar"
+               aria-label="Current loop progress"
+               aria-valuemin="0"
+               aria-valuemax="108"
+               aria-valuenow="0">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+          <div class="progress-note" id="progressNote">
+            108 chants remaining in loop 1.
+          </div>
+        </div>
+
+        <div class="controls">
+          <button class="control-button minus" id="minusBtn"
+                  type="button" aria-label="Decrease count">−</button>
+          <button class="control-button plus" id="plusBtn"
+                  type="button" aria-label="Count one chant">+</button>
+          <button class="control-button reset" id="resetBtn" type="button">
+            Reset loop
+          </button>
+        </div>
+
+        <button class="reset-everything-button" id="resetEverythingBtn" type="button">
+          ↺ Reset everything
+        </button>
+      </section>
+
+      <!-- RIGHT: one voice panel and both progress summaries -->
+      <aside class="dashboard-sidebar">
+
+        <section class="voice-panel" aria-labelledby="voiceTitle">
+          <div class="voice-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <rect x="9" y="2" width="6" height="13" rx="3"/>
+              <path d="M5 11a7 7 0 0 0 14 0M12 18v4m-4 0h8"/>
+            </svg>
+          </div>
+
+          <div class="voice-copy">
+            <h2 id="voiceTitle">Count with your voice</h2>
+            <p id="voiceHint">
+              Say “Radhe Radhe” to count one chant, or say “Reset” to reset the current loop.
+            </p>
+            <p class="transcript" id="transcript" aria-live="polite">
+              Your recognized words will appear here.
+            </p>
+          </div>
+
+          <button id="micBtn" class="mic-button"
+                  type="button" aria-pressed="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="9" y="2" width="6" height="13" rx="3"/>
+              <path d="M5 11a7 7 0 0 0 14 0M12 18v4m-4 0h8"/>
+            </svg>
+            <span id="micButtonText">Start listening</span>
+          </button>
+        </section>
+
+        <section class="session-progress-card" aria-labelledby="progressTitle">
+          <h2 id="progressTitle">Your progress</h2>
+
+          <div class="progress-section">
+            <div class="progress-heading">
+              <span>Loops completed</span>
+              <strong id="loopProgress">0 / 5</strong>
+            </div>
+            <div class="progress-track"
+                 id="loopsProgressTrack"
+                 role="progressbar"
+                 aria-label="Loops completed"
+                 aria-valuemin="0"
+                 aria-valuemax="5"
+                 aria-valuenow="0">
+              <div class="progress-fill loop-progress-fill"
+                   id="loopsProgressFill"></div>
+            </div>
+            <div class="progress-percentage" id="loopPercent">0% complete</div>
+          </div>
+
+          <div class="progress-section">
+            <div class="progress-heading">
+              <span>Total chants</span>
+              <strong id="overallProgress">0 / 540</strong>
+            </div>
+            <div class="progress-track"
+                 id="sessionProgressTrack"
+                 role="progressbar"
+                 aria-label="Overall chanting progress"
+                 aria-valuemin="0"
+                 aria-valuemax="540"
+                 aria-valuenow="0">
+              <div class="progress-fill session-progress-fill"
+                   id="sessionProgressFill"></div>
+            </div>
+            <div class="progress-percentage" id="sessionPercent">0% complete</div>
+          </div>
+
+          <p class="progress-help">
+            Keep your rhythm. Your progress updates as each chant is counted.
+          </p>
+        </section>
+
+      </aside>
+    </div>
+
+    <footer>
+      <span class="footer-feather" aria-hidden="true">✦</span>
+      <span>Take a breath. Find your rhythm. Keep chanting.</span>
+    </footer>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </main>
+
+  <div id="completionCelebration" class="celebration-overlay" hidden>
+  <div class="graffiti graffiti-one">🎉</div>
+  <div class="graffiti graffiti-two">✨</div>
+  <div class="graffiti graffiti-three">🌸</div>
+  <div class="graffiti graffiti-four">🎊</div>
+  <div class="graffiti graffiti-five">💥</div>
+
+  <div class="celebration-message">
+    <div class="celebration-symbol">🙏</div>
+    <h1>Radhe Radhe!</h1>
+    <p>All Jaaps Completed!</p>
+    <span>Beautifully done. जय श्री राधे!</span>
+  </div>
+</div>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
