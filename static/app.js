@@ -391,36 +391,38 @@
   }
 
   function processSpeechResult(result, resultIndex, generation) {
-    const alternatives = Array.from(result).map(item => item.transcript);
+    // Wait until the browser finalizes this speech result.
+    if (!result.isFinal) return;
 
-    // Prefer an alternative containing complete phrases or Reset.
+    // Never process the same finalized result slot twice.
+    if (countedByResultIndex.has(resultIndex)) return;
+
+    const alternatives = Array.from(result).map(
+      item => item.transcript
+    );
+
+    // Prefer an alternative containing a complete chant or Reset.
     const best = alternatives.find(text =>
       countChantPairs(text) > 0 || isResetCommand(text)
     ) || alternatives[0] || "";
 
+    // Mark this finalized result as processed.
+    countedByResultIndex.set(resultIndex, true);
+
     if (!best) return;
 
     if (isResetCommand(best)) {
-      if (result.isFinal) {
-        handleFinalTranscript(best);
-      }
+      handleFinalTranscript(best);
       return;
     }
 
     const detected = countChantPairs(best);
-    const alreadyCounted = countedByResultIndex.get(resultIndex) || 0;
 
-    // Interim transcripts may grow. Only count newly added pairs.
-    // Never reduce the committed count if the browser revises text.
-    if (detected > alreadyCounted) {
-      const delta = detected - alreadyCounted;
-      countedByResultIndex.set(resultIndex, detected);
-      void enqueueVoiceIncrements(delta, generation);
+    if (detected > 0) {
+      void enqueueVoiceIncrements(detected, generation);
     }
 
-    if (result.isFinal) {
-      els.transcript.textContent = `Heard: “${best.trim()}”`;
-    }
+    els.transcript.textContent = `Heard: “${best.trim()}”`;
   }
 
   function startListening() {
@@ -439,7 +441,7 @@
     recognition = new SpeechRecognition();
     recognition.lang = "hi-IN";
     recognition.continuous = true;
-    recognition.interimResults = true;
+    recognition.interimResults = false;
     recognition.maxAlternatives = 5;
 
     recognition.onstart = () => setListeningState(true);
