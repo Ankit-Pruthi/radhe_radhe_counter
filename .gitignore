@@ -8,6 +8,7 @@
 .DS_Store
 Thumbs.db
 .vscode/
+__pycache__/
 
 # Chrome extension local builds
 food-recipe-chrome-extension_v1/dist/
